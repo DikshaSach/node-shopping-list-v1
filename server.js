@@ -12,6 +12,7 @@ const {ShoppingList} = require('./models');
 const {Recipes} = require('./models');
 const jsonParser = bodyParser.json();
 const app = express();
+const recipeRouter = require('./routes/recipesRouter');
 
 // log the http layer
 app.use(morgan('common'));
@@ -26,16 +27,22 @@ ShoppingList.create('tomatoes', 3);
 ShoppingList.create('peppers', 4);
 Recipes.create('chocolate milk', ['cocoa', 'milk', 'sugar']);
 Recipes.create('Pasta', ['Pasta', 'Oil', 'Salt', 'Pasta Sauce']);
+
+const middleware = (req, res, next) => {
+  console.log('My Middleware is running');
+  res.status(500).json({message: 'blocked'});
+}
+
+// app.use(middleware);
+
 // when the root of this route is called with GET, return
 // all current ShoppingList items by calling `ShoppingList.get()`
-app.get('/shopping-list', (req, res) => {
+app.get('/shopping-list', middleware, (req, res) => {
   res.json(ShoppingList.get());
 });
-//return all recipes by calling Recipes.get()
-app.get('/recipes', (req, res) =>
-{
-res.json(Recipes.get());
-});
+
+app.use('/recipes',recipeRouter);
+
 
 app.listen(process.env.PORT || 8080, () => {
   console.log(`Your app is listening on port ${process.env.PORT || 8080}`);
